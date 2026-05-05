@@ -1,98 +1,139 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+type Role = 'artist' | 'studio';
 
-export default function HomeScreen() {
+export default function OnboardingScreen() {
+  const [step, setStep] = useState(0);
+  const [role, setRole] = useState<Role>('artist');
+
+  const isLast = step === 2;
+  const cta = step === 0 ? 'START' : 'NEXT';
+
+  const title = useMemo(() => {
+    if (step === 0) return 'JOIN ETCHD';
+    if (step === 1) return "LET’S SIGN UP..";
+    return 'HOW ARE YOU JOINING?';
+  }, [step]);
+
+  const onNext = () => {
+    if (step < 2) setStep((value) => value + 1);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView style={styles.root}>
+      <View style={styles.header}>
+        <Text style={styles.logo}>ETCHD</Text>
+        <Text style={styles.close}>✕</Text>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View style={styles.body}>
+        {step === 0 && (
+          <>
+            <Text style={styles.heroTitle}>{title}</Text>
+            <Text style={styles.heroSubtitle}>For artists and studios ready to be discovered in Bali</Text>
+            <Text style={styles.helper}>Create your profile, showcase your work and receive inquiries from serious clients..</Text>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <Text style={styles.screenTitle}>{title}</Text>
+            <Text style={styles.section}>HOW IT WORKS?</Text>
+            <StepItem num="01" title="SIGN UP" body="Follow the guided registration process to provide your essential professional details and studio affiliation.." />
+            <StepItem num="02" title="CREATE PROFILE AND PORTFOLIO" body="Build your professional profile and showcase your best work on your portfolio. GET DISCOVERED.." />
+            <StepItem num="03" title="INQUIRIES & BOOKINGS" body="Once active, receive structured inquiries and booking through ETCHD.." />
+          </>
+        )}
+
+        {isLast && (
+          <>
+            <Text style={styles.screenTitle}>{title}</Text>
+            <Text style={styles.section}>CHOOSE THE PROFILE THAT FITS YOU BEST..</Text>
+
+            <Pressable
+              style={[styles.option, role === 'artist' ? styles.optionActive : styles.optionInactive]}
+              onPress={() => setRole('artist')}>
+              <Text style={[styles.optionText, role === 'artist' ? styles.optionTextActive : styles.optionTextInactive]}>
+                TATTOO ARTIST
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.option, role === 'studio' ? styles.optionActive : styles.optionInactive]}
+              onPress={() => setRole('studio')}>
+              <Text style={[styles.optionText, role === 'studio' ? styles.optionTextActive : styles.optionTextInactive]}>
+                TATTOO STUDIO
+              </Text>
+            </Pressable>
+
+            <Text style={styles.helpTitle}>WHICH ONE FITS ME?</Text>
+            <Text style={styles.helpHeader}>TATTOO ARTIST</Text>
+            <Text style={styles.helpBody}>For independent artists or studio artists..</Text>
+            <Text style={styles.helpHeader}>TATTOO STUDIO</Text>
+            <Text style={styles.helpBody}>For studios with one or multiple artists..</Text>
+          </>
+        )}
+
+        <Pressable style={styles.button} onPress={onNext}>
+          <Text style={styles.buttonText}>{cta}</Text>
+        </Pressable>
+
+        {step === 0 && (
+          <Text style={styles.login}>Already have an account? <Text style={styles.loginAccent}>Log In</Text></Text>
+        )}
+      </View>
+
+      <View style={styles.tabBar}>
+        {['DISCOVER', 'SAVED', 'INQUIRIES', 'PROFILE'].map((item, idx) => (
+          <Text key={item} style={[styles.tabLabel, idx === 3 && styles.tabActive]}>{item}</Text>
+        ))}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function StepItem({ num, title, body }: { num: string; title: string; body: string }) {
+  return (
+    <View style={styles.stepRow}>
+      <Text style={styles.stepNum}>{num}</Text>
+      <View style={styles.stepTextWrap}>
+        <Text style={styles.stepTitle}>{title}</Text>
+        <Text style={styles.stepBody}>{body}</Text>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  root: { flex: 1, backgroundColor: '#020305' },
+  header: { height: 64, borderBottomWidth: 1, borderBottomColor: '#14171a', paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  logo: { color: '#e8eaec', fontSize: 35/2, fontWeight: '700', letterSpacing: 0.8 },
+  close: { color: '#d4d8dd', fontSize: 18 },
+  body: { flex: 1, paddingHorizontal: 28, paddingTop: 34 },
+  heroTitle: { color: '#fff', fontSize: 56/2, fontWeight: '800', marginTop: 240, textAlign: 'center' },
+  heroSubtitle: { color: '#eceff3', fontSize: 34/2, textAlign: 'center', marginTop: 18, lineHeight: 26 },
+  helper: { color: '#788088', fontSize: 10, textAlign: 'center', letterSpacing: 2, marginTop: 220 },
+  screenTitle: { color: '#fff', fontSize: 52/2, fontWeight: '800', marginBottom: 36 },
+  section: { color: '#8f98a3', fontSize: 30/2, letterSpacing: 4, fontWeight: '600', marginBottom: 24 },
+  stepRow: { flexDirection: 'row', marginBottom: 28 },
+  stepNum: { color: '#00828e', fontSize: 48/2, width: 64 },
+  stepTextWrap: { flex: 1 },
+  stepTitle: { color: '#d8dde3', fontSize: 42/2, letterSpacing: 1 },
+  stepBody: { color: '#7d848b', fontSize: 16/1.8, lineHeight: 24, marginTop: 6 },
+  option: { height: 56, alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  optionActive: { backgroundColor: '#0f7076' },
+  optionInactive: { borderWidth: 1, borderColor: '#0f7076' },
+  optionText: { letterSpacing: 4, fontWeight: '700' },
+  optionTextActive: { color: '#061114' },
+  optionTextInactive: { color: '#0f97a4' },
+  helpTitle: { color: '#0a8a95', fontSize: 12, marginTop: 30, marginBottom: 8 },
+  helpHeader: { color: '#eef1f4', fontSize: 24/2, fontWeight: '700', marginTop: 10 },
+  helpBody: { color: '#7a8086', fontSize: 16/1.8, marginTop: 4 },
+  button: { marginTop: 'auto', backgroundColor: '#0f7076', height: 58, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+  buttonText: { color: '#020d10', fontSize: 15, fontWeight: '800', letterSpacing: 4 },
+  login: { color: '#dce0e4', textAlign: 'center', marginBottom: 12, fontSize: 14 },
+  loginAccent: { color: '#078d97', fontWeight: '700' },
+  tabBar: { borderTopWidth: 1, borderTopColor: '#14171a', height: 72, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', paddingHorizontal: 14 },
+  tabLabel: { color: '#747c84', fontSize: 11, letterSpacing: 1.4 },
+  tabActive: { color: '#04919d' },
 });
